@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利润计算器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 动态背景 */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+            letter-spacing: 2px;
+        }
+
+        .calculator-box {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.3);
+            border: 1px solid rgba(0, 200, 255, 0.3);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #29b6f6;
+            background: rgba(0, 30, 60, 0.5);
+            color: white;
+            font-size: 1.1em;
+            box-sizing: border-box;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00bcd4, #0097a7);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.4);
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #00acc1, #00838f);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 188, 212, 0.6);
+        }
+
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 50, 80, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #00bcd4;
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00e5ff;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        .analysis-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 30, 60, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .analysis-title {
+            font-size: 1.2em;
+            color: #81c784;
+            margin-bottom: 15px;
+        }
+
+        .analysis-content {
+            line-height: 1.6;
+        }
+
+        .finance-icons {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .icon {
+            font-size: 2em;
+            opacity: 0.7;
+            animation: pulse 3s infinite;
+        }
+
+        .icon:nth-child(2n) {
+            animation-delay: 1s;
+        }
+
+        .icon:nth-child(3n) {
+            animation-delay: 2s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .financial-term {
+            position: absolute;
+            color: rgba(100, 255, 218, 0.6);
+            font-size: 0.9em;
+            animation: floatText 25s linear infinite;
+            white-space: nowrap;
+            z-index: -1;
+        }
+
+        @keyframes floatText {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="background" id="background"></div>
+
+    <div class="container">
+        <h1>利润计算器</h1>
+
+        <div class="finance-icons">
+            <div class="icon">📊</div>
+            <div class="icon">💰</div>
+            <div class="icon">📈</div>
+            <div class="icon">📉</div>
+            <div class="icon">💼</div>
+            <div class="icon">💳</div>
+        </div>
+
+        <div class="calculator-box">
+            <div class="input-group">
+                <label for="totalProfit">利润总额（万元）</label>
+                <input type="number" id="totalProfit" placeholder="请输入利润总额" step="any">
+            </div>
+
+            <div class="input-group">
+                <label for="taxExpense">所得税费用（万元）</label>
+                <input type="number" id="taxExpense" placeholder="请输入所得税费用" step="any">
+            </div>
+
+            <button onclick="calculateNetProfit()">计算净利润</button>
+
+            <div class="result-container">
+                <div class="result-title">计算净利润</div>
+                <div class="result-value" id="netProfitResult">-- 万元</div>
+            </div>
+
+            <div class="analysis-container">
+                <div class="analysis-title">财务分析</div>
+                <div class="analysis-content" id="financialAnalysis">
+                    请先输入数据并点击"计算净利润"按钮以获取财务分析结果
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 创建动态背景粒子
+        function createBackground() {
+            const background = document.getElementById('background');
+            
+            // 创建圆形粒子
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机大小和位置
+                const size = Math.random() * 60 + 10;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // 随机动画时间
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                
+                background.appendChild(particle);
+            }
+            
+            // 添加金融术语浮动效果
+            const terms = [
+                '净利润', '营业收入', '成本费用', '资产负债', '现金流量',
+                '投资回报率', '毛利率', '运营资本', '股东权益', '财务杠杆',
+                '流动比率', '速动比率', '市盈率', '净资产收益率', '负债率',
+                '总资产周转率', '营业利润率', 'EBITDA', '自由现金流', '资本公积'
+            ];
+            
+            for (let i = 0; i < 15; i++) {
+                const term = document.createElement('div');
+                term.classList.add('financial-term');
+                term.textContent = terms[Math.floor(Math.random() * terms.length)];
+                
+                term.style.left = `${Math.random() * 100}%`;
+                term.style.top = `${Math.random() * 100}%`;
+                term.style.fontSize = `${Math.random() * 0.8 + 0.7}em`;
+                term.style.animationDuration = `${Math.random() * 30 + 20}s`;
+                
+                document.body.appendChild(term);
+            }
+        }
+
+        // 计算净利润函数
+        function calculateNetProfit() {
+            // 获取输入值
+            const totalProfitInput = document.getElementById('totalProfit');
+            const taxExpenseInput = document.getElementById('taxExpense');
+            const netProfitResult = document.getElementById('netProfitResult');
+            const financialAnalysis = document.getElementById('financialAnalysis');
+            
+            const totalProfit = parseFloat(totalProfitInput.value);
+            const taxExpense = parseFloat(taxExpenseInput.value);
+            
+            // 检查输入是否有效
+            if (isNaN(totalProfit) || isNaN(taxExpense)) {
+                alert('请输入有效的数字！');
+                return;
+            }
+            
+            // 计算净利润
+            const netProfit = totalProfit - taxExpense;
+            
+            // 显示结果
+            netProfitResult.textContent = netProfit.toFixed(2) + ' 万元';
+            
+            // 生成财务分析
+            generateFinancialAnalysis(totalProfit, taxExpense, netProfit);
+        }
+
+        // 生成财务分析
+        function generateFinancialAnalysis(totalProfit, taxExpense, netProfit) {
+            const analysisDiv = document.getElementById('financialAnalysis');
+            
+            // 计算税率
+            let taxRate = 0;
+            let effectiveTaxRate = 0;
+            
+            if (totalProfit > 0) {
+                taxRate = (taxExpense / totalProfit) * 100;
+                effectiveTaxRate = Math.max(0, taxRate); // 确保非负数
+            }
+            
+            // 净利润率
+            let netProfitMargin = 0;
+            if (totalProfit !== 0) {
+                netProfitMargin = (netProfit / totalProfit) * 100;
+            }
+            
+            // 生成分析内容
+            let analysis = '';
+            
+            if (netProfit >= 0) {
+                analysis += `<p><strong>✅ 盈利状态：</strong>公司处于盈利状态，净利润为 ${netProfit.toFixed(2)} 万元。</p>`;
+            } else {
+                analysis += `<p><strong>⚠️ 亏损状态：</strong>公司出现亏损，净亏损为 ${Math.abs(netProfit).toFixed(2)} 万元。</p>`;
+            }
+            
+            analysis += `<p><strong>📊 税务情况：</strong>所得税费用为 ${taxExpense.toFixed(2)} 万元`;
+            if (totalProfit > 0 && taxExpense > 0) {
+                analysis += `，实际税率为 ${effectiveTaxRate.toFixed(2)}%。`;
+            } else if (taxExpense <= 0) {
+                analysis += `，无所得税费用或享受税收优惠。`;
+            } else {
+                analysis += `。`;
+            }
+            
+            analysis += `</p>`;
+            
+            analysis += `<p><strong>📈 净利润率：</strong>${netProfitMargin.toFixed(2)}%</p>`;
+            
+            // 基于净利润率的分析
+            if (netProfitMargin > 15) {
+                analysis += `<p><strong>🏆 盈利能力：</strong>公司盈利能力非常强，净利润率超过15%，属于优秀水平。</p>`;
+            } else if (netProfitMargin > 10) {
+                analysis += `<p><strong>👍 盈利能力：</strong>公司盈利能力较强，净利润率在10%-15%之间，属于良好水平。</p>`;
+            } else if (netProfitMargin > 5) {
+                analysis += `<p><strong>⚠️ 盈利能力：</strong>公司盈利能力一般，净利润率在5%-10%之间，需要注意成本控制。</p>`;
+            } else if (netProfitMargin > 0) {
+                analysis += `<p><strong>💡 盈利能力：</strong>公司盈利能力较弱，净利润率低于5%，需加强管理提升效率。</p>`;
+            } else {
+                analysis += `<p><strong>🚨 盈利能力：</strong>公司处于亏损状态，需要尽快分析原因并采取措施改善经营状况。</p>`;
+            }
+            
+            // 与行业平均水平比较（假设）
+            const industryAvg = 8.5; // 假设行业平均净利润率为8.5%
+            if (netProfit > 0) {
+                if (netProfitMargin > industryAvg) {
+                    analysis += `<p><strong>📈 行业对比：</strong>公司净利润率高于行业平均水平（${industryAvg}%），具有竞争优势。</p>`;
+                } else {
+                    analysis += `<p><strong>🔍 行业对比：</strong>公司净利润率低于行业平均水平（${industryAvg}%），需优化经营策略。</p>`;
+                }
+            }
+            
+            // 税务合规提示
+            if (taxExpense < 0) {
+                analysis += `<p><strong>📋 税务说明：</strong>所得税费用为负数可能表示有税务抵扣或退税情况，请确保符合相关税收法规。</p>`;
+            } else if (taxExpense === 0 && totalProfit > 0) {
+                analysis += `<p><strong>📋 税务说明：</strong>所得税费用为0，可能享受了税收优惠政策或存在递延所得税情况。</p>`;
+            }
+            
+            analysis += `<p><strong>📝 财务建议：</strong>根据企业会计准则和税收法规，建议定期审查财务报表，确保数据准确性，并咨询专业会计师进行深入的财务分析。</p>`;
+            
+            analysisDiv.innerHTML = analysis;
+        }
+
+        // 页面加载完成后初始化背景
+        window.onload = function() {
+            createBackground();
+            
+            // 如果输入框值改变，自动清除结果
+            document.getElementById('totalProfit').addEventListener('input', function() {
+                document.getElementById('netProfitResult').textContent = '-- 万元';
+                document.getElementById('financialAnalysis').innerHTML = '请先输入数据并点击"计算净利润"按钮以获取财务分析结果';
+            });
+            
+            document.getElementById('taxExpense').addEventListener('input', function() {
+                document.getElementById('netProfitResult').textContent = '-- 万元';
+                document.getElementById('financialAnalysis').innerHTML = '请先输入数据并点击"计算净利润"按钮以获取财务分析结果';
+            });
+        };
+
+        // 支持回车键触发计算
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateNetProfit();
+            }
+        });
+    </script>
+</body>
+</html>
